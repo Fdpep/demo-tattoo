@@ -1,0 +1,10 @@
+'use strict';
+let heroIndex=0;
+function showWork(id){const w=db.works.find(w=>w.id===id);if(!w)return;open(esc(w.title),`<div class="work-detail"><img src="${esc(workImage(w))}" alt="${esc(w.title)}"><div><p class="eyebrow">${esc(w.category)}</p><p>${esc(w.note)}</p><p>Ti interessa un soggetto simile? Aggiungi questo lavoro come riferimento e raccontami cosa vorresti cambiare.</p><button class="btn" data-inspired="${w.id}">Vorrei qualcosa di simile ↗</button></div></div>`,true)}
+function heroSlide(direction){heroIndex=(heroIndex+direction+initial.works.length)%initial.works.length;const w=initial.works[heroIndex],img=$('#hero-photo');img.src=workImage(w);img.alt=w.title;$('#hero-photo-open').dataset.work=w.id;$('#hero-photo-open').setAttribute('aria-label','Apri '+w.title);$('#hero-photo-label').textContent=w.title;$('#hero-counter').textContent=`${heroIndex+1} / ${initial.works.length}`}
+function rememberDraft(){const form=$('#request-form');if(form)for(const[k,v]of new FormData(form))if(k!=='reference')draft[k]=v}
+document.addEventListener('click',e=>{const el=e.target.closest('button');if(!el)return;if(el.dataset.heroDir)heroSlide(Number(el.dataset.heroDir));if(el.dataset.inspired){const w=db.works.find(w=>w.id===el.dataset.inspired);draft.referenceWork={id:w.id,title:w.title,photo:workImage(w),source:'https://esteticavicino.com/studi-di-tatuaggi/fiumicino/tattoo-artist-christian/'};step=0;request()}if(el.dataset.action==='remove-reference'){rememberDraft();delete draft.image;delete draft.fileName;request()}if(el.dataset.action==='remove-work'){rememberDraft();delete draft.referenceWork;request()}if(el.dataset.action==='edit-project'){step=0;request()}});
+let touchOrigin;
+const photo=$('.photo-hero');
+photo.addEventListener('touchstart',e=>{touchOrigin={x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY}},{passive:true});
+photo.addEventListener('touchend',e=>{if(!touchOrigin)return;const dx=e.changedTouches[0].clientX-touchOrigin.x,dy=e.changedTouches[0].clientY-touchOrigin.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy))heroSlide(dx<0?1:-1);touchOrigin=null},{passive:true});
